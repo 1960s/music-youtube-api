@@ -1,0 +1,35 @@
+	use curl, javascript, python, app ascript, and explorer
+	try localhost if not see if github page works
+	configure client id key
+use a bash loop
+	parse json
+	grep to find get pagetoken and playlist
+evaluate nextpage true or false to break while loop
+
+get billboard songs list
+convert songs to youtube video ids //can search with {artist name} - TOPIC
+create playlist
+insert videos into playlist by date of release or charting period
+
+download playlists using youtube dl
+send downloaded files to youtube music or put in onedrive
+use a thrid party music service
+
+//items/snippet(title), pageInfo //fields syntax
+
+
+BASH CODE FOR JSON VALUE
+
+myKEY="nextPageToken"
+myJSON=$()
+BOOL=$(echo "$myJSON" | grep -o '"$myKEY": "[^"]*')
+PAGETOKEN=$(echo "$BOOL" | grep -o '[^"]*$')
+
+
+item[0].id
+items[0].snippet.title
+
+url
+song title
+album title
+artist names
