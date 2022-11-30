@@ -5,49 +5,156 @@
    * See instructions for running APIs Explorer code samples locally:
    * https://developers.google.com/explorer-help/code-samples#javascript
    */
-let playlist = ""
 
-  function authenticate() {
-    return gapi.auth2.getAuthInstance()
-        .signIn({scope: "https://www.googleapis.com/auth/youtube.readonly"})
-        .then(function() { console.log("Sign-in successful"); },
-              function(err) { console.error("Error signing in", err); });
-  }
-  function loadClient() {
-    gapi.client.setApiKey("");//apikey
-    return gapi.client.load("https://www.googleapis.com/discovery/v1/apis/youtube/v3/rest")
-        .then(function() { console.log("GAPI client loaded for API"); },
-              function(err) { console.error("Error loading GAPI client for API", err); });
-  }
-  // Make sure the client is loaded and sign-in is complete before calling this method.
-  function execute() {
-    return gapi.client.youtube.playlists.list({
-      "part": [
-        "snippet,contentDetails,id"
-      ],
-      "channelId": "",
-"maxResults": 50,
-"fields": "items/snippet(title), items/id"
-    })
-        .then(function(response) {
-                // Handle the results here (response.result has the parsed body).
-                console.log("Response", response);
-saveTextAsFile("playlist", response.body)
 
-              },
-              function(err) { console.error("Execute error", err); });
-  }
-  gapi.load("client:auth2", function() {
-    gapi.auth2.init({client_id: ""});
-  });
+function authenticate() {
+  return gapi.auth2.getAuthInstance()
+    .signIn({scope: "https://www.googleapis.com/auth/youtube.readonly"})
+    .then(function() { console.log("Sign-in successful"); },
+          function(err) { console.error("Error signing in", err); });
+}
+
+
+function loadClient() {
+  gapi.client.setApiKey(APIKEY);//apikey
+  return gapi.client.load("https://www.googleapis.com/discovery/v1/apis/youtube/v3/rest")
+    .then(function() { console.log("GAPI client loaded for API"); },
+          function(err) { console.error("Error loading GAPI client for API", err); });
+}
+
+
+
+
+
+
+// Make sure the client is loaded and sign-in is complete before calling this method.
+function execute() {
+  return gapi.client.youtube.playlistItems.list({
+    "part": [
+      "contentDetails, snippet"
+    ],
+    "maxResults": resultVar,
+    "playlistId": playlistVar,
+      "fields": fieldVar
+  })
+    .then(function(response) {
+    // Handle the results here (response.result has the parsed body).
+    console.log("Response", response);
+JSON = response.result
+jsonObj = response.body
+  },
+          function(err) { console.error("Execute error", err); });
+}
+
+
+//for flipping through pageTokens
+function execute2(token) {
+  return gapi.client.youtube.playlistItems.list({
+    "part": [
+      "contentDetails, snippet"
+    ],
+    "maxResults": resultVar,
+    "pageToken": `${token}`,
+    "playlistId": playlistVar,
+      "fields": fieldVar
+  })
+    .then(function(response) {
+    // Handle the results here (response.result has the parsed body).
+    console.log("Response", response);
+JSON = response.result
+jsonObj = response.body
+  },
+          function(err) { console.error("Execute error", err); });
+}
+
+
+
+let JSON;
+let music;
+let jsonObj;
+let downJSON;
+async function pageSift(){
+
+  music = [["Title", "Artist", "URL"]]
+  let token = JSON.nextPageToken
+  console.log(token)
+
+  //in case initial response has pages
+  while (/**/Object.hasOwn(JSON, "nextPageToken")) {
+	downJSON += jsonObj + ","
+    pageStr()
+
+    await execute2(token)
+    token = JSON.nextPageToken
+    console.log(token)
+
+  } 
+
+//last page function call
+  pageStr()
+	downJSON += jsonObj
+}
+
+
+function pageStr(){
+    for (let i = 0; i < JSON.items.length; i++) {
+      let musicSet = []
+      console.log(JSON.items[i].snippet.title)
+      console.log(JSON.items[i].snippet.videoOwnerChannelTitle.replace(/ - Topic/, ""))
+      console.log(`https://www.youtube.com/watch?v=${JSON.items[i].contentDetails.videoId}`)
+
+      musicSet.push(JSON.items[i].snippet.title)   
+      musicSet.push(JSON.items[i].snippet.videoOwnerChannelTitle
+                    .replace(/ - Topic/, ""))
+      musicSet.push(`https://www.youtube.com/watch?v=${JSON.items[i].contentDetails.videoId}`)
+
+      music.push(musicSet)
+
+    }
+}
+
+
+
+
+
+gapi.load("client:auth2", function() {
+  gapi.auth2.init({client_id: CLIENTID});
+});
+
+
+
+
+
+//download file
+function download (){
+
+let str = ""
+for (let i = 0; i < music.length; i++) {
+  str += music[i].join("\t")
+  str += "\n"
+}
+
+    saveTextAsFile("playlist", str, "csv")
+}
+
+//download file
+function download2 (){
+
+    saveTextAsFile("json", downJSON, "json")
+}
+
+
+
+
+
 
 
 //FILE SAVING
-  function saveTextAsFile(str, contents){      
+  function saveTextAsFile(str, contents, filetype){      
     var textToWrite = contents;
    var textToWrite = textToWrite.replace(/\n/g, "\r\n");
     var textFileAsBlob = new Blob([textToWrite], {type:'text/plain'});
-    var fileNameToSaveAs = `${str}.json`; //name file here
+    var fileNameToSaveAs = `${str}.${filetype}`; //name file here
 
     var downloadLink = document.createElement("a");
     downloadLink.download = fileNameToSaveAs;
@@ -69,12 +176,16 @@ saveTextAsFile("playlist", response.body)
     document.body.removeChild(event.target);
   }
 
+/*
 
 
-
+*/
 
 
 </script>
 <button onclick="authenticate()">authorize</button>
 <button onclick="loadClient()">load</button>
 <button onclick="execute()">execute</button>
+<button onclick="pageSift()">pagesift</button>
+<button onclick="download()">download</button>
+<button onclick="download2()">download</button>

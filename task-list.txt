@@ -4,7 +4,15 @@
 use a bash loop
 	parse json
 	grep to find get pagetoken and playlist
-evaluate nextpage true or false to break while loop
+	format selection shortcut
+	csv formating
+evaluate nextpage true or false 
+recursion and to break while loop
+	limit content called
+	define seperator
+song metadata wikipedia or billboard
+
+
 
 get billboard songs list
 convert songs to youtube video ids //can search with {artist name} - TOPIC
@@ -16,6 +24,9 @@ send downloaded files to youtube music or put in onedrive
 use a thrid party music service
 
 //items/snippet(title), pageInfo //fields syntax
+
+
+
 
 
 BASH CODE FOR JSON VALUE
