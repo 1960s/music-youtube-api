@@ -1,0 +1,271 @@
+<input type="file" id="fileInput" multiple>
+<br>
+<button id="fileJS" onclick="handleFiles(fileInput)">Convert CSV to JS Object</button>
+<br>
+<button onclick="authenticate()">authorize</button>
+<br>
+<button onclick="loadClient()">load</button>
+<br>
+<button onclick="execute()">search for youtube video ids</button>
+<br>
+<input id="inputField" placeholder="place playlist name here" type="text">
+<br>
+<button onclick="playlistInsert()">create playlist name</button>
+<br>
+<button onclick="playlistMaker()">make playlist</button>
+<br>
+<button onclick="download2()">download</button>
+
+<script src="https://apis.google.com/js/api.js"></script>
+<script>
+let playlistTitle = document.getElementById("inputField")
+
+  /**
+   * Sample JavaScript code for youtube.channels.list
+   * See instructions for running APIs Explorer code samples locally:
+   * https://developers.google.com/explorer-help/code-samples#javascript
+   */
+gapi.load("client:auth2", function() {
+  gapi.auth2.init({client_id: CLIENTID});
+});
+
+
+function authenticate() {
+  return gapi.auth2.getAuthInstance()
+    .signIn({scope: "https://www.googleapis.com/auth/youtube.readonly"})
+    .then(function() { console.log("Sign-in successful"); },
+          function(err) { console.error("Error signing in", err); });
+}
+
+
+function loadClient() {
+  gapi.client.setApiKey(APIKEY);//apikey
+  return gapi.client.load("https://www.googleapis.com/discovery/v1/apis/youtube/v3/rest")
+    .then(function() { console.log("GAPI client loaded for API"); },
+          function(err) { console.error("Error loading GAPI client for API", err); });
+}
+
+
+
+
+
+// Make sure the client is loaded and sign-in is complete before calling this method.
+let musicData; //go to fileConverter function
+async function execute() {
+
+for (let i = 0; i < musicData.length; i++) {
+
+await gapi.client.youtube.search.list({
+      "part": [
+        "snippet"
+      ],
+      "maxResults": 1,
+      "q": `${musicData[i].artist} - topic ${musicData[i].song}`,
+      "type": [
+        "video"
+      ],
+      "fields": "items(id/videoId, snippet(title, channelTitle))"
+    }
+)
+    .then(function(response) {
+    // Handle the results here (response.result has the parsed body).
+    console.log("Response", response);
+//jsonObj = response.result
+musicData[i].videoId = response.result.items[0].id.videoId
+  },
+          function(err) { console.error("Execute error", err); });
+}
+
+console.log(musicData)
+
+}
+
+
+let playlistId;
+ async function playlistInsert() {
+    await gapi.client.youtube.playlists.insert({
+      "part": [
+        "snippet, contentDetails"
+      ],
+      "resource": {
+        "snippet": {
+          "title": playlistTitle,
+          "description": "TEST"
+        }
+      }
+    })
+        .then(function(response) {
+                // Handle the results here (response.result has the parsed body).
+                console.log("Response", response);
+ playlistId = response.result.id
+              },
+              function(err) { console.error("Execute error", err); });
+  }
+
+/*
+  async function playlistMaker() {
+
+for (let i = 0; i < musicData.length; i++) {
+
+    await gapi.client.youtube.playlistItems.insert({
+      "part": [
+        "snippet"
+      ],
+      "resource": {
+        "snippet": {
+          "playlistId": playlistId,
+         // "position": 0,
+          "resourceId": {
+            "kind": "youtube#video",
+            "videoId": "495BNPUeq1A"
+          }
+        }
+      }
+    })
+        .then(function(response) {
+                // Handle the results here (response.result has the parsed body).
+                console.log("Response", response);
+
+              },
+              function(err) { console.error("Execute error", err); });
+}
+
+
+  }
+
+
+
+*/
+
+
+
+
+
+
+let jsonObj;
+let music;
+let jsonStr = [];
+let downloadJSON;
+
+
+
+
+
+//download file
+function download (){
+
+let str = ""
+for (let i = 0; i < music.length; i++) {
+  str += music[i].join("\t")
+  str += "\n"
+}
+
+    saveTextAsFile("playlist", str, "csv")
+}
+
+//download file
+function download2 (){
+
+    saveTextAsFile("searchQuery", jsonStr.join(","), "json")
+}
+
+
+
+
+
+
+//GETTING FILES
+  function handleFiles() {
+
+   let fileInput = document.getElementById("fileInput")
+    let arr = []
+
+    for (let i = 0; i < fileInput.files.length; i++) {
+
+      let reader = new FileReader()
+
+      reader.readAsText(fileInput.files[i])
+
+      reader.onload = function() {
+
+let fileNameOutput = fileInput.files[i].name.replace(/\./gi, '-')//need to fix for lazy 
+console.log(fileNameOutput)
+fileConverter(reader.result, fileNameOutput)
+      }
+
+    }
+  }
+
+
+
+
+//FILE CONVERSION
+  function fileConverter(csvFile, fileNameOutput){
+
+//breaking down CSV
+//splitting page content to lines
+    let arr1 = csvFile.split("\n")
+ console.log(arr1)
+     
+//splitting line content to items
+let arr2 = []
+arr1.forEach((el) => {
+
+arr2.push(el.split("\t"))
+})
+console.log(arr2)
+
+
+//building up JS Object
+musicData = []
+//title headings are in 0, so start on 1
+for (let i = 1; i < arr2.length; i++) {
+  
+  let musicObj = {}
+  for (let j = 0; j < arr2[i].length; j++) {
+//headings are in 0, ex."artist" and "song"
+    musicObj[arr2[0][j]] = arr2[i][j]
+  }
+ 
+               
+  musicData.push(musicObj)
+}
+//saveTextAsFile(fileNameOutput, "js", JSON.stringify(musicData))
+console.log(musicData)
+  }
+
+
+
+//FILE SAVING
+  function saveTextAsFile(str, contents, filetype){      
+    var textToWrite = contents;
+   var textToWrite = textToWrite.replace(/\n/g, "\r\n");
+    var textFileAsBlob = new Blob([textToWrite], {type:'text/plain'});
+    var fileNameToSaveAs = `${str}.${filetype}`; //name file here
+
+    var downloadLink = document.createElement("a");
+    downloadLink.download = fileNameToSaveAs;
+    downloadLink.innerHTML = `${str}`;//<--custom change, find out meaning
+
+    window.URL = window.URL || window.webkitURL;
+
+    downloadLink.href = window.URL.createObjectURL(textFileAsBlob);
+
+    downloadLink.onclick = destroyClickedElement;
+    downloadLink.style.display = "none";
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+
+
+  }
+
+  function destroyClickedElement(event){
+    document.body.removeChild(event.target);
+  }
+
+/*
+
+*/
+
+
+</script>

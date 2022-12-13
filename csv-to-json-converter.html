@@ -1,0 +1,115 @@
+<input type="file" id="fileInput" multiple>
+
+<button id="fileJS" onclick="handleFiles(fileInput)">Convert CSV to JS Object</button>
+
+<script>
+
+
+
+
+//GETTING FILES
+  function handleFiles() {
+
+   let fileInput = document.getElementById("fileInput")
+    let arr = []
+
+    for (let i = 0; i < fileInput.files.length; i++) {
+
+      let reader = new FileReader()
+
+      reader.readAsText(fileInput.files[i])
+
+      reader.onload = function() {
+
+let fileNameOutput = fileInput.files[i].name.replace(/\./gi, '-')//need to fix for lazy 
+console.log(fileNameOutput)
+fileConverter(reader.result, fileNameOutput)
+
+
+
+
+      }
+
+    }
+  }
+
+
+
+
+//FILE CONVERSION
+  function fileConverter(csvFile, fileNameOutput){
+
+//breaking down CSV
+//splitting page content to lines
+    let arr1 = csvFile.split("\n")
+ console.log(arr1)
+     
+//splitting line content to items
+let arr2 = []
+arr1.forEach((el) => {
+
+arr2.push(el.split("\t"))
+})
+console.log(arr2)
+
+
+//building up JS Object
+let musicData = []
+//title headings are in 0, so start on 1
+for (let i = 1; i < arr2.length; i++) {
+  
+  let musicObj = {}
+  for (let j = 0; j < arr2[i].length; j++) {
+//headings are in 0, ex."artist" and "song"
+    musicObj[arr2[0][j]] = arr2[i][j]
+  }
+ 
+               
+  musicData.push(musicObj)
+}
+//saveTextAsFile(fileNameOutput, "js", JSON.stringify(musicData))
+console.log(musicData)
+  }
+
+
+
+
+ 
+//FILE SAVING
+  function saveTextAsFile(fileName, fileType, contents){      
+    var textToWrite = contents;
+    var textToWrite = textToWrite.replace(/\n/g, "\r\n");
+    var textFileAsBlob = new Blob([textToWrite]);
+    var fileNameToSaveAs = `${fileName}.${fileType}`; //name file here
+
+    var downloadLink = document.createElement("a");
+    downloadLink.download = fileNameToSaveAs;
+    downloadLink.innerHTML = `${fileName}`;//<--custom change, find out meaning
+
+    window.URL = window.URL || window.webkitURL;
+
+    downloadLink.href = window.URL.createObjectURL(textFileAsBlob);
+
+    downloadLink.onclick = destroyClickedElement;
+    downloadLink.style.display = "none";
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+
+
+  }
+
+  function destroyClickedElement(event){
+    document.body.removeChild(event.target);
+  }
+
+
+
+
+
+
+</script>
+
+
+
+
+
