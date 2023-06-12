@@ -1,25 +1,43 @@
 <!DOCTYPE html>
 <html>
-  <head>
-<meta name="no-referrer-when-downgrade" content="origin"/>
-  </head>
-  <body>
-<script src="https://accounts.google.com/gsi/client" onload="console.log('CLIENT')"></script>
-<script src="https://apis.google.com/js/api.js" onload="console.log('GAPI')"></script>
-<script src="youtube-func-init.js"></script>
-<script src="youtube-func-playlist.js"></script>
-<script src="youtube-func-playlist-items.js"></script>
-<script src="youtube-func-download.js"></script>
 
-<button onclick="client.requestAccessToken()">authorize(only needed for private data)</button>
-<br>
+<head>
+  <meta name="no-referrer-when-downgrade" content="origin" />
+</head>
+
+<body>
 
 
-<button onclick="loadClient()">load library</button>
-<br>
+  <script src="https://accounts.google.com/gsi/client" onload="console.log('CLIENT')"></script>
+  <script src="https://apis.google.com/js/api.js" onload="console.log('GAPI')"></script>
+  <script src="youtube-func-init.js"></script>
+  <script src="youtube-func-playlist.js"></script>
+  <script src="youtube-func-playlist-items.js"></script>
+  <script src="youtube-func-download.js"></script>
+
+  For Private Data:
+  <br>
+  CLIENTID: <input placeholder="required" id="clientId" type="text">
+  <br>
+  <button onclick="loadAuth()">Set CLIENTID</button>
+  <br>
+  <button onclick="client.requestAccessToken()">authorize(only needed for private data)</button>
+  <br>
+  <br>
+ 
 
 
-<!--
+  For Public Data:
+  <br>
+  APIKEY: <input placeholder="required" id="apiKey" type="text">
+  <br>
+
+  <button onclick="loadClient()">load library</button>
+  <br>
+
+
+
+  <!--
 
 
 test access token for private
@@ -29,15 +47,15 @@ test on a few playlists with big playlist
 <script src="youtube-func-search"></script>
 <script src="youtube-func-insert"></script>
 -->
-<br>
-<button id="fileJS" onclick="channelPlaylists()">get channel playlists' ids</button>
-<br>
+  <br>
+  <button id="fileJS" onclick="channelPlaylists()">get channel playlists' ids</button>
+  <br>
 
 
-<br>
-<button id="fileJS" onclick="playlistSort()">get all items for playlists</button>
-<br>
-<!--
+  <br>
+  <button id="fileJS" onclick="playlistSort()">get all items for playlists</button>
+  <br>
+  <!--
 
 <br>
 <button id="fileJS" onclick="playlistItems()">get all items for playlists</button>
@@ -49,50 +67,44 @@ test on a few playlists with big playlist
 <br>
 -->
 
-<br>
-<button onclick="downloadCsv(csvDownload)">download csv playlist items</button>
-<br>
+  <br>
+  <button onclick="downloadCsv(csvDownload)">download csv playlist items</button>
+  <br>
 
-<br>
-<button onclick="downloadJson(jsonDownload)">download json playlist items</button>
-<br>
+  <br>
+  <button onclick="downloadJson(jsonDownload)">download json playlist items</button>
+  <br>
 
+  CANNOT USE THESE BELOW:
 
+  <input type="file" id="fileInput" multiple>
+  <br>
+  <button id="fileJS" onclick="handleFiles(fileInput)">Convert CSV to JS Object</button>
+  <br>
 
-<input type="file" id="fileInput" multiple>
-<br>
-<button id="fileJS" onclick="handleFiles(fileInput)">Convert CSV to JS Object</button>
-<br>
-
-<button onclick="searchItems()">search for youtube video ids</button>
-<br>
-
-
-<input id="playlistTitle" placeholder="place playlist name here" type="text">
-<br>
-<input id="playlistDescription" placeholder="place playlist description here" type="text">
-<br>
-<button onclick="playlistInsert()">create named playlist</button>
-<br>
+  <button onclick="searchItems()">search for youtube video ids</button>
+  <br>
 
 
-
-<button onclick="playlistMaker()">make playlist</button>
-<br>
+  <input id="playlistTitle" placeholder="place playlist name here" type="text">
+  <br>
+  <input id="playlistDescription" placeholder="place playlist description here" type="text">
+  <br>
+  <button onclick="playlistInsert()">create named playlist</button>
+  <br>
 
 
 
-<button onclick="downloadJson()">download</button>
+  <button onclick="playlistMaker()">make playlist</button>
+  <br>
+
+
+
+  <button onclick="downloadJson()">download</button>
 
 
 
 
-  </body>
+</body>
+
 </html>
-
-
-
-
-
-
-
