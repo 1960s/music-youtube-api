@@ -1,9 +1,10 @@
 
-let channelId = "UCk4wPJZ9BdFauMI_5-P5J_A"
 let fieldVar = "items(id, snippet(title))"
 let playlistsJson; 
 
 function channelPlaylists(){
+
+  let channelId = document.getElementById("channelId").value || "UCk4wPJZ9BdFauMI_5-P5J_A"
 
   return gapi.client.youtube.playlists.list({
     "part": [
